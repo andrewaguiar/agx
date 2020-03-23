@@ -38,6 +38,7 @@ defmodule Agx.GlobalConfig do
           "tmp",
           "log",
           "vendor",
+          "node_modules",
           "public",
           "_build",
           "cover",
