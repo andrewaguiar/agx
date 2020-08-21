@@ -3,6 +3,7 @@ defmodule Agx.Scanner do
 
   def generate(files, term) do
     files
+      |> Enum.filter(fn file -> String.valid?(File.read!(file)) end)
       |> Enum.map(fn file ->
         file
           |> File.read!

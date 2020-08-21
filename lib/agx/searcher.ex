@@ -1,46 +1,18 @@
 defmodule Agx.Searcher do
-  def find(base_path, args_config, global_config) do
-    deep_find_files(base_path, args_config, global_config) |> List.flatten
+  def find() do
+    System.cmd("git", ["ls-files"])
+    |> handle
   end
 
-  defp deep_find_files(base, args_config, global_config) do
-    base
-      |> File.ls!
-      |> Enum.map(fn file ->
-        file_path = "#{base}/#{file}"
-
-        check(file_path, args_config, global_config, %{
-          folder: File.dir?(file_path),
-          ignored_folder: (Enum.member?(global_config.ignored_folders, file) || hidden_dir?(file_path, args_config[:all])),
-          allowed_extention: allowed_extention?(file, args_config, global_config)
-        })
-      end)
+  defp handle({result, 0}) do
+    result
+    |> String.split("\n")
+    |> Enum.reject(fn s -> s == "" end)
   end
 
-  defp check(_, _, _, %{folder: true, ignored_folder: true}), do: []
+  defp handle({_, 1}) do
+    IO.puts("git ls-files command not found")
 
-  defp check(_, _, _, %{folder: false, allowed_extention: false}), do: []
-
-  defp check(file_path, args_config, global_config, %{folder: true, ignored_folder: false}) do
-    deep_find_files(file_path, args_config, global_config)
-  end
-
-  defp check(file_path, _, _, %{folder: false, allowed_extention: true}) do
-    file_path
-  end
-
-  defp allowed_extention?(file, args_config, global_config) do
-    file_ext = file |> String.split(".") |> List.last
-
-    exts = if args_config[:ext], do: String.split(args_config[:ext], ","), else: global_config.allowed_extentions
-    exts |> Enum.member?(file_ext)
-  end
-
-  def hidden_dir?(_, true) do
-    false
-  end
-
-  def hidden_dir?(file, _) do
-    File.dir?(file) && String.starts_with?(Path.basename(file), ".")
+    System.halt(1)
   end
 end

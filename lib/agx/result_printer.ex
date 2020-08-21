@@ -6,7 +6,6 @@ defmodule Agx.ResultPrinter do
     matched_lines
       |> Enum.each(fn {file, line, index} ->
         around_text = highlight(format_line(line, term), term)
-
         IO.puts("#{Colors.green(format_file(file))}:#{Colors.blue(index)} -> #{around_text}")
       end)
   end
